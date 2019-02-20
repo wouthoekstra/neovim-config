@@ -15,25 +15,6 @@ Plug 'enricobacis/vim-airline-clock'
 Plug 'tpope/vim-surround'
 Plug 'adoy/vim-php-refactoring-toolbox'
 Plug 'rakr/vim-one'
-Plug 'prettier/vim-prettier', {
-  \ 'do': 'yarn install',
-  \ 'branch': 'release/1.x',
-  \ 'for': [
-    \ 'javascript',
-    \ 'typescript',
-    \ 'css',
-    \ 'less',
-    \ 'scss',
-    \ 'json',
-    \ 'graphql',
-    \ 'markdown',
-    \ 'vue',
-    \ 'lua',
-    \ 'php',
-    \ 'python',
-    \ 'ruby',
-    \ 'html',
-    \ 'swift' ] }
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
@@ -62,9 +43,16 @@ let g:airline#extensions#ale#enabled = 1
 " Use a slightly slimmer error pointer
 hi ALEErrorSign guifg=#DF8C8C
 hi ALEWarningSign guifg=#F2C38F
-let g:ale_fixers={
-  \'php': ['prettier'],
-\}
+" global language specifics
+let g:ale_php_phpcs_executable = 'phpcs'
+let g:ale_php_phpcs_standard = 'PSR2'
+let g:ale_php_phpcbf_standard='PSR2'
+" let g:ale_php_phpcs_standard='phpcs.xml.dist'
+" let g:ale_php_phpmd_ruleset='phpmd.xml'
+" let g:ale_fixers = {
+"   \ '*': ['remove_trailing_lines', 'trim_whitespace'],
+"   \ 'php': ['phpcbf', 'php_cs_fixer', 'remove_trailing_lines', 'trim_whitespace'],
+"   \}
 
 " ctrlp configuration
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
