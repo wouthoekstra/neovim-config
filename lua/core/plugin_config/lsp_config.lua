@@ -42,7 +42,7 @@ require("lspconfig").volar.setup {
 }
 
 require("mason-null-ls").setup({
- ensure_installed = {
+  ensure_installed = {
     'eslint_d',
   }
 })

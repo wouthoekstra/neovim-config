@@ -4,5 +4,6 @@ vim.o.termguicolors = true
 
 require('onedark').setup {
     style = 'warmer'
+    -- style = 'light'
 }
 require('onedark').load()
