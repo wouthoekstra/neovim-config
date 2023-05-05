@@ -1,9 +1,9 @@
 vim.o.termguicolors = true
--- vim.o.background = "light"
+vim.o.background = "light"
 -- vim.cmd [[ colorscheme gruvbox ]] -- Light color scheme
 
 require('onedark').setup {
-    style = 'warmer'
-    -- style = 'light'
+    -- style = 'warmer'
+    style = 'light'
 }
 require('onedark').load()
