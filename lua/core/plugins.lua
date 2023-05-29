@@ -20,6 +20,7 @@ return require('packer').startup(function(use)
   use 'nvim-lualine/lualine.nvim'
   use 'nvim-treesitter/nvim-treesitter'
   use 'nvim-treesitter/nvim-treesitter-context'
+  use 'nvim-treesitter/playground'
 
   --completion
   use 'hrsh7th/nvim-cmp'
@@ -49,6 +50,8 @@ return require('packer').startup(function(use)
 
   use 'folke/trouble.nvim'
   use 'folke/zen-mode.nvim'
+  use 'folke/twilight.nvim'
+
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
   if packer_bootstrap then

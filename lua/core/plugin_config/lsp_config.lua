@@ -3,6 +3,8 @@ require("mason-lspconfig").setup({
   ensure_installed = {
     "volar",
     "lua_ls",
+    "tsserver",
+    "rust_analyzer",
   }
 })
 
@@ -46,3 +48,8 @@ require("mason-null-ls").setup({
     'eslint_d',
   }
 })
+
+require('lspconfig').tsserver.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+}
