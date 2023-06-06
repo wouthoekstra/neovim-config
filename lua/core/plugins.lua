@@ -27,9 +27,9 @@ return require('packer').startup(function(use)
   use 'hrsh7th/cmp-nvim-lsp'
   use 'L3MON4d3/LuaSnip'
   use 'saadparwaiz1/cmp_luasnip'
-  use 'rafamadriz/friendly-snippets'
-
+  -- use 'rafamadriz/friendly-snippets'
   use 'github/copilot.vim'
+  use 'jmbuhr/otter.nvim'
 
   use {
     'williamboman/mason.nvim',

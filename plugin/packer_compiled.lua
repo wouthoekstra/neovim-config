@@ -94,11 +94,6 @@ _G.packer_plugins = {
     path = "/home/wout/.local/share/nvim/site/pack/packer/start/copilot.vim",
     url = "https://github.com/github/copilot.vim"
   },
-  ["friendly-snippets"] = {
-    loaded = true,
-    path = "/home/wout/.local/share/nvim/site/pack/packer/start/friendly-snippets",
-    url = "https://github.com/rafamadriz/friendly-snippets"
-  },
   ["gitsigns.nvim"] = {
     loaded = true,
     path = "/home/wout/.local/share/nvim/site/pack/packer/start/gitsigns.nvim",
@@ -164,10 +159,20 @@ _G.packer_plugins = {
     path = "/home/wout/.local/share/nvim/site/pack/packer/start/onedark.nvim",
     url = "https://github.com/navarasu/onedark.nvim"
   },
+  ["otter.nvim"] = {
+    loaded = true,
+    path = "/home/wout/.local/share/nvim/site/pack/packer/start/otter.nvim",
+    url = "https://github.com/jmbuhr/otter.nvim"
+  },
   ["packer.nvim"] = {
     loaded = true,
     path = "/home/wout/.local/share/nvim/site/pack/packer/start/packer.nvim",
     url = "https://github.com/wbthomason/packer.nvim"
+  },
+  playground = {
+    loaded = true,
+    path = "/home/wout/.local/share/nvim/site/pack/packer/start/playground",
+    url = "https://github.com/nvim-treesitter/playground"
   },
   ["plenary.nvim"] = {
     loaded = true,

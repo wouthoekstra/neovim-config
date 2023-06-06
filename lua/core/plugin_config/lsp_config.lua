@@ -3,6 +3,7 @@ require("mason-lspconfig").setup({
   ensure_installed = {
     "volar",
     "lua_ls",
+    "sqlls",
     "tsserver",
     "rust_analyzer",
   }
@@ -52,4 +53,17 @@ require("mason-null-ls").setup({
 require('lspconfig').tsserver.setup {
   on_attach = on_attach,
   capabilities = capabilities,
+}
+
+require('lspconfig').sqlls.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+}
+
+require('lspconfig').rust_analyzer.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  cmd = {
+    "rustup", "run", "stable", "rust-analyzer",
+  }
 }

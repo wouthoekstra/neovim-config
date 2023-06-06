@@ -1,14 +1,16 @@
 local cmp = require("cmp")
 
-require('luasnip.loaders.from_vscode').lazy_load()
+-- require('luasnip.loaders.from_vscode').lazy_load()
 
 cmp.setup({
   mapping = cmp.mapping.preset.insert({
-    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-o>'] = cmp.mapping.complete(),
+    ['<C-space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+    ['<C-n>'] = cmp.mapping(cmp.mapping.select_next_item()),
+    ['<C-p>'] = cmp.mapping(cmp.mapping.select_prev_item()),
   }),
   snippet = {
     expand = function(args)
@@ -19,8 +21,13 @@ cmp.setup({
   {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
+    { name = 'otter' }, -- Todo make this one work with sql
   },
   {
     { name = 'buffer' },
   }),
+  experimental = {
+    native_menu = false,
+    ghost_text = true,
+  },
 })
