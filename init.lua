@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -150,13 +150,14 @@ vim.o.splitbelow = true
 --   See `:help lua-options`
 --   and `:help lua-options-guide`
 vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+-- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = '  ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
 
 -- Show which line your cursor is on
-vim.o.cursorline = true
+vim.o.cursorline = false
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.o.scrolloff = 10
@@ -218,6 +219,72 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.hl.on_yank()
   end,
 })
+
+-- Wout's options
+vim.o.wrap = false
+
+-- Wout's custom keymaps
+vim.keymap.set('n', '<leader>p', 'o<esc>p<CR>', { desc = 'Paste in new line' })
+vim.keymap.set('v', '<leader>p', '"_dP', { desc = 'Paste without yanking' })
+
+-- Opens the custom Todo plugin
+vim.keymap.set('n', '<leader>td', ':Todo<CR>', { noremap = true, silent = true, desc = "Open Wout's Todo list" })
+
+-- Wout's custom plugins
+------------------ WOUT TODO PLUGIN ------------------
+local function open_todo()
+  local file = vim.fn.expand '~/Documents/todo.md'
+  local buf = nil
+  -- Check if a buffer for the file already exists
+  local bufid = vim.fn.bufnr(file, false)
+  if bufid == -1 then
+    buf = vim.api.nvim_create_buf(true, false)
+    vim.api.nvim_buf_set_name(buf, file)
+    if vim.fn.filereadable(file) == 1 then
+      local lines = vim.fn.readfile(file)
+      vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+    end
+  else
+    buf = bufid
+  end
+
+  -- Set markdown filetype
+  vim.api.nvim_buf_set_option(buf, 'filetype', 'markdown')
+
+  -- Calculate floating window dimensions and position
+  local width = math.floor(vim.o.columns * 0.8)
+  local height = math.floor(vim.o.lines * 0.8)
+  local row = math.floor((vim.o.lines - height) / 2)
+  local col = math.floor((vim.o.columns - width) / 2)
+  local opts = {
+    relative = 'editor',
+    width = width,
+    height = height,
+    row = row,
+    col = col,
+    style = 'minimal',
+    border = 'rounded',
+  }
+  local win = vim.api.nvim_open_win(buf, true, opts)
+
+  -- Map <Esc> in normal mode to close the floating window
+  vim.api.nvim_buf_set_keymap(buf, 'n', '<Esc>', ':q<CR>', { noremap = true, silent = true })
+
+  -- Auto-save on window close
+  vim.api.nvim_create_autocmd('WinClosed', {
+    pattern = tostring(win),
+    callback = function()
+      if vim.api.nvim_buf_get_option(buf, 'modified') then
+        vim.api.nvim_buf_call(buf, function()
+          vim.cmd 'write!'
+        end)
+      end
+    end,
+  })
+end
+
+vim.api.nvim_create_user_command('Todo', open_todo, {})
+------------------ WOUT TODO PLUGIN ------------------
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -672,7 +739,7 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
-        -- gopls = {},
+        gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -681,7 +748,8 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        tsserver = {},
+        yamlls = {},
         --
 
         lua_ls = {
@@ -977,7 +1045,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
