@@ -529,6 +529,34 @@ require('lazy').setup({
     end,
   },
 
+  -- TypeScript Tools - Better TypeScript/JavaScript support
+  {
+    'pmizio/typescript-tools.nvim',
+    ft = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
+    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    config = function()
+      require('typescript-tools').setup {
+        on_attach = function(client, bufnr)
+          -- Disable typescript-tools formatting, let ESLint handle it
+          client.server_capabilities.documentFormattingProvider = false
+          client.server_capabilities.documentRangeFormattingProvider = false
+        end,
+        settings = {
+          -- Don't format, let ESLint handle it
+          tsserver_format_options = {
+            insertSpaceAfterCommaDelimiter = false,
+            insertSpaceAfterSemicolonInForStatements = false,
+            insertSpaceBeforeAndAfterBinaryOperators = false,
+            insertSpaceAfterKeywordsInControlFlowStatements = false,
+          },
+          -- Include completions with insert text for better experience
+          complete_function_calls = false,
+          include_completions_with_insert_text = true,
+        },
+      }
+    end,
+  },
+
   -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -744,13 +772,40 @@ require('lazy').setup({
         rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
+        -- TypeScript/JavaScript: Using typescript-tools.nvim instead of ts_ls
+        -- See the typescript-tools.nvim configuration in the plugins section
         --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        ts_ls = {},
         yamlls = {},
-        --
+
+        -- ESLint for linting only (no formatting on save, no navigation features)
+        eslint = {
+          on_attach = function(client, bufnr)
+            -- Keep formatting capability for manual use with :EslintFixAll
+            client.server_capabilities.documentFormattingProvider = true
+
+            -- Disable ALL navigation capabilities - let typescript-tools handle these
+            client.server_capabilities.definitionProvider = false
+            client.server_capabilities.typeDefinitionProvider = false
+            client.server_capabilities.implementationProvider = false
+            client.server_capabilities.referencesProvider = false
+            client.server_capabilities.documentSymbolProvider = false
+            client.server_capabilities.workspaceSymbolProvider = false
+            client.server_capabilities.hoverProvider = false
+            client.server_capabilities.signatureHelpProvider = false
+            client.server_capabilities.renameProvider = false
+            client.server_capabilities.completionProvider = false
+            -- No auto-formatting on save
+          end,
+          settings = {
+            -- Use the ESLint configurations from each subdirectory
+            workingDirectory = { mode = "auto" },
+            format = true,
+            -- No automatic fixes on save
+            codeActionOnSave = {
+              enable = false,
+            },
+          },
+        },
 
         lua_ls = {
           -- cmd = { ... },
@@ -824,7 +879,15 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = {
+          c = true,
+          cpp = true,
+          -- Disable for JS/TS since ESLint handles formatting on save
+          javascript = true,
+          javascriptreact = true,
+          typescript = true,
+          typescriptreact = true,
+        }
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
@@ -836,11 +899,10 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        -- JavaScript/TypeScript formatting disabled - using typescript-tools.nvim diagnostics only
+        -- Run ESLint manually via terminal when needed: npm run lint
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
     },
   },
