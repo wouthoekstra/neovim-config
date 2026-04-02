@@ -131,6 +131,24 @@ vim.o.smartcase = true
 -- Keep signcolumn on by default
 vim.o.signcolumn = 'yes'
 
+-- Show folder name in the terminal tab title, plus Claude Code's status if running
+vim.o.title = true
+function _G.nvim_title()
+  local cwd = vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(buf) and (vim.api.nvim_buf_get_name(buf)):match 'claude%-code' then
+      local term_title = vim.b[buf].term_title
+      if term_title and term_title ~= '' then
+        -- Strip leading separators that Claude Code adds to its title
+        term_title = term_title:gsub('^[·%s]+', '')
+        return term_title .. ' (' .. cwd .. ')'
+      end
+    end
+  end
+  return cwd
+end
+vim.o.titlestring = '%{v:lua.nvim_title()}'
+
 -- Decrease update time
 vim.o.updatetime = 250
 
