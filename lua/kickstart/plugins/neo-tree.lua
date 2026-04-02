@@ -20,6 +20,9 @@ return {
           ['\\'] = 'close_window',
         },
       },
+      -- Refresh git status when files change on disk (e.g., after Claude commits)
+      bind_to_cwd = true,
+      use_libuv_file_watcher = true,
     },
   },
 }
