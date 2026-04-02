@@ -1029,6 +1029,56 @@ require('lazy').setup({
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
+  { -- Claude Code integration
+    'greggh/claude-code.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      -- Match Ghostty's default colors in the Claude terminal so output looks native
+      vim.api.nvim_set_hl(0, 'ClaudeCodeTerminal', { bg = '#282c34', fg = '#ffffff' })
+      vim.api.nvim_create_autocmd('TermOpen', {
+        pattern = '*claude*',
+        callback = function()
+          vim.wo.winhighlight = 'Normal:ClaudeCodeTerminal'
+          -- Set Ghostty's default 16-color palette for this terminal buffer
+          local ghostty_palette = {
+            '#1d1f21', '#cc6666', '#b5bd68', '#f0c674',
+            '#81a2be', '#b294bb', '#8abeb7', '#c5c8c6',
+            '#666666', '#d54e53', '#b9ca4a', '#e7c547',
+            '#7aa6da', '#c397d8', '#70c0b1', '#eaeaea',
+          }
+          for i, color in ipairs(ghostty_palette) do
+            vim.b['terminal_color_' .. (i - 1)] = color
+          end
+        end,
+      })
+      require('claude-code').setup({
+        -- Unset NVIM/VIM/VIMRUNTIME: prevents Claude from detecting Neovim and
+        -- falling back to plain markdown output instead of rich ANSI rendering.
+        -- FORCE_COLOR=3: ensures Node.js chalk uses full 24-bit truecolor output.
+        command = 'env -u NVIM -u VIM -u VIMRUNTIME FORCE_COLOR=3 claude',
+        window = {
+          position = 'vertical',
+          split_ratio = 0.4,
+        },
+      })
+      -- Override the plugin's <C-j> window navigation on Claude buffers so
+      -- Shift+Enter (which Ghostty sends as \n / <C-j>) passes through as a newline
+      vim.api.nvim_create_autocmd('TermOpen', {
+        pattern = '*claude*',
+        callback = function()
+          local buf = vim.api.nvim_get_current_buf()
+          vim.defer_fn(function()
+            if vim.api.nvim_buf_is_valid(buf) then
+              vim.keymap.set('t', '<C-j>', function()
+                vim.fn.chansend(vim.b.terminal_job_id, '\n')
+              end, { buffer = buf, desc = 'Newline (Shift+Enter)' })
+            end
+          end, 200)
+        end,
+      })
+    end,
+  },
+
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
