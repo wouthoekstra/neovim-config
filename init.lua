@@ -1054,9 +1054,12 @@ require('lazy').setup({
     config = function()
       -- Match Ghostty's default colors in the Claude terminal so output looks native
       vim.api.nvim_set_hl(0, 'ClaudeCodeTerminal', { bg = '#282c34', fg = '#ffffff' })
+      -- Track auto-scroll state: ON by default, OFF when user enters normal mode to browse
+      local claude_auto_scroll = {}
       vim.api.nvim_create_autocmd('TermOpen', {
         pattern = '*claude*',
         callback = function()
+          claude_auto_scroll[vim.api.nvim_get_current_buf()] = true
           vim.wo.winhighlight = 'Normal:ClaudeCodeTerminal'
           -- Set Ghostty's default 16-color palette for this terminal buffer
           local ghostty_palette = {
@@ -1095,6 +1098,42 @@ require('lazy').setup({
           end, 200)
         end,
       })
+      -- Disable auto-scroll when user enters normal mode to browse terminal history,
+      -- but not when they're just navigating away (e.g., <C-h> exits terminal mode
+      -- briefly before switching windows)
+      vim.api.nvim_create_autocmd('TermLeave', {
+        callback = function(ev)
+          local buf = ev.buf
+          if vim.api.nvim_buf_get_name(buf):match 'claude%-code' then
+            vim.schedule(function()
+              if vim.api.nvim_get_current_buf() == buf then
+                claude_auto_scroll[buf] = false
+              end
+            end)
+          end
+        end,
+      })
+      -- Re-enable auto-scroll when user re-enters terminal mode
+      vim.api.nvim_create_autocmd('TermEnter', {
+        callback = function(ev)
+          if vim.api.nvim_buf_get_name(ev.buf):match 'claude%-code' then
+            claude_auto_scroll[ev.buf] = true
+          end
+        end,
+      })
+      -- Auto-scroll the Claude terminal to the bottom while focus is elsewhere
+      local scroll_timer = vim.uv.new_timer()
+      scroll_timer:start(0, 500, vim.schedule_wrap(function()
+        for _, win in ipairs(vim.api.nvim_list_wins()) do
+          local buf = vim.api.nvim_win_get_buf(win)
+          if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_get_name(buf):match 'claude%-code' then
+            if claude_auto_scroll[buf] then
+              local line_count = vim.api.nvim_buf_line_count(buf)
+              vim.api.nvim_win_set_cursor(win, { line_count, 0 })
+            end
+          end
+        end
+      end))
     end,
   },
 
