@@ -1121,7 +1121,10 @@ require('lazy').setup({
           end
         end,
       })
-      -- Auto-scroll the Claude terminal to the bottom while focus is elsewhere
+      -- Auto-scroll the Claude terminal to the bottom while focus is elsewhere.
+      -- Only moves the cursor when content has grown to avoid interfering with
+      -- Ink's screen rendering (which causes duplicate UI elements).
+      local claude_last_line = {}
       local scroll_timer = vim.uv.new_timer()
       scroll_timer:start(0, 500, vim.schedule_wrap(function()
         for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -1129,7 +1132,10 @@ require('lazy').setup({
           if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_get_name(buf):match 'claude%-code' then
             if claude_auto_scroll[buf] then
               local line_count = vim.api.nvim_buf_line_count(buf)
-              vim.api.nvim_win_set_cursor(win, { line_count, 0 })
+              if line_count ~= claude_last_line[buf] then
+                claude_last_line[buf] = line_count
+                vim.api.nvim_win_set_cursor(win, { line_count, 0 })
+              end
             end
           end
         end
