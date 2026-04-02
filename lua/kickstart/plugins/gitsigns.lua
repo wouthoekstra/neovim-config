@@ -48,7 +48,24 @@ return {
         map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
         map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
         map('n', '<leader>hb', gitsigns.blame_line, { desc = 'git [b]lame line' })
-        map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
+        -- Toggle diff view: gitsigns.diffthis() has no built-in close, and
+        -- manually closing the split leaves diff mode on, breaking gutter signs
+        -- and buffer reload. This toggles cleanly by disabling diff mode and
+        -- closing the temporary gitsigns:// buffer.
+        map('n', '<leader>hd', function()
+          if vim.wo.diff then
+            vim.cmd 'diffoff!'
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+              local buf = vim.api.nvim_win_get_buf(win)
+              if vim.api.nvim_buf_get_name(buf):match 'gitsigns://' then
+                vim.api.nvim_win_close(win, true)
+                break
+              end
+            end
+          else
+            gitsigns.diffthis()
+          end
+        end, { desc = 'git [d]iff against index (toggle)' })
         map('n', '<leader>hD', function()
           gitsigns.diffthis '@'
         end, { desc = 'git [D]iff against last commit' })
